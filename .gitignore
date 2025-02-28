@@ -1,0 +1,36 @@
+# Исключаем виртуальное окружение
+venv/
+ENV/
+.venv/
+env/
+
+# Исключаем зависимости установленные через pipenv
+Pipfile
+Pipfile.lock
+
+# Исключаем кэш Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Исключаем файлы базы данных SQLite
+*.db
+*.sqlite3
+
+# Исключаем файлы среды Flask
+.flaskenv
+instance/
+
+# Исключаем миграции Alembic (если используешь)
+migrations/
+
+# Исключаем IDE и редакторские файлы
+.vscode/
+*.code-workspace
+.idea/
+*.iml
+
+# Лог-файлы
+*.log
+logs/

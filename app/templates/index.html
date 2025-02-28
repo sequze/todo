@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="text-center mb-4">📌 Мои задачи</h2>
+
+        <button class="btn btn-outline-primary new-folder-btn">➕ Добавить новую папку</button>
+
+        <div class="d-flex gap-3 flex-wrap">
+            <div class="folder-column">
+                <div class="folder">
+                    <h5>📂 Работа <a href="#" class="edit-folder">🖊</a></h5>
+                    <a href="#" class="add-task">➕ Добавить задачу</a>
+                    <ul class="task-list mt-2">
+                        <li class="task-item"><input type="checkbox"> Подготовить отчёт</li>
+                        <li class="task-item"><input type="checkbox"> Позвонить клиенту</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="folder-column">
+                <div class="folder">
+                    <h5>📂 Спорт <a href="#" class="edit-folder">🖊</a></h5>
+                    <a href="#" class="add-task">➕ Добавить задачу</a>
+                    <ul class="task-list mt-2">
+                        <li class="task-item"><input type="checkbox"> Пробежать 5 км</li>
+                        <li class="task-item"><input type="checkbox"> Сделать растяжку</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="folder-column">
+                <div class="folder">
+                    <h5>📂 Развитие <a href="#" class="edit-folder">🖊</a></h5>
+                    <a href="#" class="add-task">➕ Добавить задачу</a>
+                    <ul class="task-list mt-2">
+                        <li class="task-item"><input type="checkbox"> Прочитать главу книги</li>
+                        <li class="task-item"><input type="checkbox"> Посмотреть лекцию</li>
+                        <li class="task-item"><input type="checkbox"> Попрактиковаться в коде</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="folder-column">
+                <div class="folder">
+                    <h5>📂 Покупки <a href="#" class="edit-folder">🖊</a></h5>
+                    <a href="#" class="add-task">➕ Добавить задачу</a>
+                    <ul class="task-list mt-2">
+                        <li class="task-item"><input type="checkbox"> Купить овощи</li>
+                        <li class="task-item"><input type="checkbox"> Заказать книгу</li>
+                        <li class="task-item"><input type="checkbox"> Посмотреть скидки</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
