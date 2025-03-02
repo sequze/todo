@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
+
+
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,55 +18,61 @@
         <button class="btn btn-outline-primary new-folder-btn">➕ Добавить новую папку</button>
 
         <div class="d-flex gap-3 flex-wrap">
+            {% for folder in folders %}
             <div class="folder-column">
                 <div class="folder">
-                    <h5>📂 Работа <a href="#" class="edit-folder">🖊</a></h5>
-                    <a href="#" class="add-task">➕ Добавить задачу</a>
-                    <ul class="task-list mt-2">
-                        <li class="task-item"><input type="checkbox"> Подготовить отчёт</li>
-                        <li class="task-item"><input type="checkbox"> Позвонить клиенту</li>
+                    <h5> {{folder.name }} <a href="#" class="edit-folder">🖊</a></h5>
+                    <a href="#" class="add-task" id="button{{folder.id}}">➕ Добавить задачу</a>
+                    <ul class="task-list mt-2" id = "{{folder.id}}">
+                        {% for task in folder.tasks %}
+                        <li class="task-item"><input type="checkbox"> {{ task.name }} </li>
+                        {% endfor %}
                     </ul>
                 </div>
             </div>
-
-            <div class="folder-column">
-                <div class="folder">
-                    <h5>📂 Спорт <a href="#" class="edit-folder">🖊</a></h5>
-                    <a href="#" class="add-task">➕ Добавить задачу</a>
-                    <ul class="task-list mt-2">
-                        <li class="task-item"><input type="checkbox"> Пробежать 5 км</li>
-                        <li class="task-item"><input type="checkbox"> Сделать растяжку</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="folder-column">
-                <div class="folder">
-                    <h5>📂 Развитие <a href="#" class="edit-folder">🖊</a></h5>
-                    <a href="#" class="add-task">➕ Добавить задачу</a>
-                    <ul class="task-list mt-2">
-                        <li class="task-item"><input type="checkbox"> Прочитать главу книги</li>
-                        <li class="task-item"><input type="checkbox"> Посмотреть лекцию</li>
-                        <li class="task-item"><input type="checkbox"> Попрактиковаться в коде</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="folder-column">
-                <div class="folder">
-                    <h5>📂 Покупки <a href="#" class="edit-folder">🖊</a></h5>
-                    <a href="#" class="add-task">➕ Добавить задачу</a>
-                    <ul class="task-list mt-2">
-                        <li class="task-item"><input type="checkbox"> Купить овощи</li>
-                        <li class="task-item"><input type="checkbox"> Заказать книгу</li>
-                        <li class="task-item"><input type="checkbox"> Посмотреть скидки</li>
-                    </ul>
-                </div>
-            </div>
+            {%endfor%}
         </div>
 
     </div>
 
+    <script>
+        window.onload = function(){
+            function add_btn(folder_id) {
+            let newTask = document.createElement("li");
+            newTask.innerHTML = `
+            <form id="task-form">
+                <div class="d-flex gap-2">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="task-name` + folder_id + `" placeholder="Task name" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btn` + folder_id + `">Add Task</button>
+                </div>
+            </form>
+            `;
+            document.getElementById(folder_id).appendChild(newTask);
+            let button = document.getElementById("button" + folder_id);
+            button.removeEventListener('click',() => add_btn(folder_id));
+            let btn = document.getElementById("btn" + folder_id);
+            btn.addEventListener('click', function() {
+                let input = document.getElementById("task-name" + folder_id);
+                $.ajax({
+                    url: '',
+                    type: 'post',
+                    contentType: 'application/json',
+                    data: {
+                        input_text: input.value
+                    },
+                })
+                button.addEventListener('click', () => add_btn(folder));
+            });
+            }
+            let folders = JSON.parse('{{ f_ind|tojson }}');
+            for (let folder of folders){
+                let button = document.getElementById("button" + folder);
+                button.addEventListener('click', () => add_btn(folder));
+            }
+        };
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
