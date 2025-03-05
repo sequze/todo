@@ -20,6 +20,7 @@ class User(UserMixin, db.Model):
         back_populates='user', cascade="all, delete-orphan"
     )
 
+
 class Folder(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String(64))
@@ -49,4 +50,3 @@ class Task(db.Model):
         back_populates='tasks',
     )
     is_completed: so.Mapped[bool] = so.mapped_column(default=False)
-
