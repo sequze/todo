@@ -77,3 +77,14 @@ def edit_folder():
     folder.name = new_name
     db.session.commit()
     return make_response(jsonify(success=True))
+
+
+@main.route("/delete_folder", methods=["POST"])
+def delete_folder():
+    data = request.get_json()
+    folder_id = data.get("folder_id")
+    if not folder_id:
+        return make_response(jsonify(sucess=False, error="Please enter folder id"))
+    db.session.delete(db.session.scalar(sa.select(Folder).where(Folder.id == folder_id)))
+    db.session.commit()
+    return make_response(jsonify(success=True))

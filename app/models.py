@@ -29,7 +29,7 @@ class Folder(db.Model):
         back_populates='folders'
     )
     tasks: so.Mapped[list['Task']] = so.relationship(
-        back_populates='folder'
+        back_populates='folder', cascade="all, delete-orphan"
     )
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("user.id"))
 

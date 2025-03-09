@@ -97,10 +97,20 @@ window.onload = function(){
                     folderItem.className = "folder-column";
                     let folder_id = data.folder_id;
                     folderItem.innerHTML = `
-                    <div class="folder">
-                        <h5>` + folderName + ` <a href="#" class="edit-folder">🖊</a></h5>
+                    <div class="folder" id="folder` + folder_id + `">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <h5 style="display: inline-block;">` + folderName + `</h5>
+                            <div class="dropdown">
+                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                                <ul class="dropdown-menu">
+                                  <li><button class="dropdown-item" id="folderDelete`+ folder_id + `">Удалить</button></li>
+                                  <li><button class="dropdown-item" id="folderEdit` + folder_id + `">Редактировать</button></li>
+                                </ul>
+                            </div>
+                        </div>
                         <a href="#" class="add-task" id="button` + folder_id + `">➕ Добавить задачу</a>
-                        <ul class="task-list mt-2" id = "task-list` + folder_id + `"></ul>
+                        <ul class="task-list mt-2" id = "task-list` + folder_id + `">
+                        </ul>
                     </div>
                     `;
                     createFolderInterface.remove();
@@ -108,6 +118,10 @@ window.onload = function(){
                     button.style.pointerEvents = "auto";
                     b = folderItem.querySelector(".add-task");
                     b.addEventListener('click', () => add_btn(folder_id));
+                    let btn_edit = document.getElementById("folderEdit" + folder_id);
+                    btn_edit.addEventListener('click', () => edit_folder(folder_id));
+                    let btn_delete = document.getElementById("folderDelete" + folder_id);
+                    btn_delete.addEventListener('click', () => delete_folder(folder_id));
                 }
                 else{
                     alert("Error: " + data.error);
@@ -119,7 +133,30 @@ window.onload = function(){
     
 
     //функции для редактирования и удаления папки
-    
+    function delete_folder(folder_id){
+        fetch("/delete_folder", {
+            method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "folder_id": folder_id
+                })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success){
+                document.getElementById("folder" + folder_id).remove();
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => {
+            console.error("Error", error);
+            alert("An error occurred while deleting the folder.");
+        });
+    }
+
     function edit_folder(folder_id) {
         folder = document.getElementById("folder" + folder_id);
         folderName = folder.querySelector("h5");
@@ -179,7 +216,7 @@ window.onload = function(){
                             </div>
                         `;
                         form.replaceWith(newHead);
-                        //newHead.getElementById("folderDelete" + folder_id).addEventListener();
+                        document.getElementById("folderDelete" + folder_id).addEventListener('click', () => delete_folder(folder_id));
                         document.getElementById("folderEdit" + folder_id).addEventListener('click',() => edit_folder(folder_id));
                     }
                     else{
@@ -217,6 +254,8 @@ window.onload = function(){
                 button.addEventListener('click', () => add_btn(folder));
                 let button_edit = document.getElementById("folderEdit" + folder);
                 button_edit.addEventListener('click', () => edit_folder(folder));
+                let button_delete = document.getElementById("folderDelete" + folder);
+                button_delete.addEventListener('click', () => delete_folder(folder));
             }
         
             // Добавляем слушатели кнопкам "Удалить и редактировать"
