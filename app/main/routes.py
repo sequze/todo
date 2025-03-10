@@ -88,3 +88,17 @@ def delete_folder():
     db.session.delete(db.session.scalar(sa.select(Folder).where(Folder.id == folder_id)))
     db.session.commit()
     return make_response(jsonify(success=True))
+
+@main.route("/complete_task", methods=["POST"])
+def complete_task():
+    data = request.get_json()
+    task_id = data.get("task_id")
+    if not task_id:
+        return make_response(jsonify(success=False, error="Please enter task_id"))
+    task = db.session.scalar(sa.select(Task).where(Task.id == task_id))
+    folder_id = task.folder_id
+    if not folder_id: 
+        return make_response(jsonify(success=False, error="folder not found!"))
+    task.is_completed = not task.is_completed
+    db.session.commit()
+    return make_response(jsonify(success=True, folder_id=folder_id))

@@ -1,4 +1,50 @@
 window.onload = function(){
+    function complete_task(task_id){
+        checkbox = document.getElementById("taskCheckbox" + task_id);
+        fetch('/complete_task',{
+            method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "task_id": task_id
+                })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success){
+                if (checkbox.checked){
+                    task = document.getElementById("task" + task_id);
+                    taskList = document.getElementById("task-list" + data.folder_id);
+                    taskList.removeChild(task);
+                    
+                    // taskName = task.textContent;
+                    // task.remove();
+                    // finishedTask = document.createElement("li");
+                    // finishedTask.className = "task-item";
+                    // finishedTask.innerHTML = `<input type="checkbox" id="taskCheckbox`+ task_id +`" checked>` + taskName;
+                    document.getElementById("task-completed-list" + data.folder_id).appendChild(task);  
+                }
+                else{
+                    task = document.getElementById("task" + task_id);
+                    taskList = document.getElementById("task-completed-list" + data.folder_id);
+                    taskList.removeChild(task);
+                    document.getElementById("task-list" + data.folder_id).appendChild(task);  
+            } 
+            }
+            else{
+                alert("Error" + data.error);
+                checkbox.checked = false;
+            }
+        })
+        .catch(error => {
+            console.error("Error" + error);
+            checkbox.checked = false;
+        }
+        );
+    }
+
+
     function add_btn(folder_id) {
         let button = document.getElementById("button" + folder_id);
         button.style.pointerEvents = "none";
@@ -146,7 +192,7 @@ window.onload = function(){
         .then(response => response.json())
         .then(data => {
             if (data.success){
-                document.getElementById("folder" + folder_id).remove();
+                document.getElementById("folder" + folder_id).closest(".folder-column").remove();
             } else {
                 alert("Error: " + data.error);
             }
@@ -257,14 +303,16 @@ window.onload = function(){
                 let button_delete = document.getElementById("folderDelete" + folder);
                 button_delete.addEventListener('click', () => delete_folder(folder));
             }
-        
-            // Добавляем слушатели кнопкам "Удалить и редактировать"
-
-            
         }
         else{
             alert("Error: " + data.error);
         }
     })
     .catch(error => console.error("Error", error));
+    document.querySelectorAll('.task-item input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            let taskId = checkbox.id.replace("taskCheckbox", "");
+            complete_task(taskId);
+        });
+    });
 };

@@ -33,10 +33,28 @@
                     <a href="#" class="add-task" id="button{{folder.id}}">➕ Добавить задачу</a>
                     <ul class="task-list mt-2" id = "task-list{{folder.id}}">
                         {% for task in folder.tasks %}
-                        <li class="task-item"><input type="checkbox"> {{ task.name }} </li>
+                            {% if not task.is_completed %}
+                                <li class="task-item" id="task{{task.id}}"><input type="checkbox" id="taskCheckbox{{task.id}}"> {{ task.name }} </li>
+                            {% endif %}
                         {% endfor %}
                     </ul>
+                    <div style="display: flex; align-items: center;" class="finished_tasks">
+                        <span>▸</span>
+                        <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#hiddenFolder{{folder.id}}" aria-expanded="false" aria-controls="hiddenFolder{{folder.id}}">
+                            Выполнено задач:
+                        </button>
+                    </div>  
+                    <div class="collapse" id="hiddenFolder{{folder.id}}">
+                        <div class="card card-body" id="task-completed-list{{folder.id}}">
+                            {% for task in folder.tasks %}
+                                {% if task.is_completed %}
+                                <li class="task-item" id="task{{task.id}}"><input type="checkbox"  id="taskCheckbox{{task.id}}" checked> {{ task.name }} </li>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
+                
             </div>
             {%endfor%}
         </div>
