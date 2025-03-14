@@ -63,4 +63,12 @@ body {
     transition: transform 0.3s ease-in-out;
 }
 
-
+.navbar {  
+    padding: 10px 20px; /* Добавляет отступы сверху и снизу, а также по бокам */  
+  }  
+  .navbar-brand {   /* Увеличивает вес шрифта для бренда */  
+    font-size: 1.5rem; /* Увеличивает размер шрифта для бренда */  
+  }  
+  .nav-link {  
+    margin-left: 15px; /* Добавляет отступ между ссылками */  
+  }  

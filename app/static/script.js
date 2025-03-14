@@ -1,4 +1,91 @@
 window.onload = function(){
+    function delete_task(task_id){
+        task = document.getElementById("task" + task_id).parentElement;
+        fetch("/delete_task", {
+            method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "task_id": task_id,
+                    })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success){
+                task.remove();
+            }
+            else{
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Error", error));
+    }
+    function edit_task(task_id){
+        task = document.getElementById("task" + task_id);
+        const form = document.createElement('form');  
+        form.classList.add('edit-folder-form'); // Добавим класс для стилизации  
+        taskName = task.childNodes[1].nodeValue.trim();
+                // Создаем кнопки
+        const input = document.createElement('input');  
+        input.type = 'text';
+        input.classList.add("form-control")
+        input.value = taskName;  
+
+        const saveButton = document.createElement('button');  
+        saveButton.textContent = '✅';  
+        saveButton.className = "btn btn-light btn-sm";
+        saveButton.type = 'submit';  
+
+        const cancelButton = document.createElement('button');  
+        cancelButton.textContent = '❌';  
+        cancelButton.className = "btn btn-light btn-sm";
+        cancelButton.type = 'button'; // Важно, чтобы не отправлял форму  
+
+        form.appendChild(input);  
+        form.appendChild(saveButton);  
+        form.appendChild(cancelButton);
+        form.style = "display: flex; gap: 10px; align-items: center;";
+        task.replaceWith(form);
+        form.addEventListener("submit", async(event) => {
+            event.preventDefault();
+            let newName = input.value;
+            if (newName && newName != taskName){
+                fetch("/edit_task", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "task_id": task_id,
+                        "name": newName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success){
+                        newTask = document.createElement("li");
+                        newTask.innerHTML = `
+                        <li id="task` + task_id + `"><input type="checkbox" id="taskCheckbox` + task_id + `"> ` + newName + ` </li>
+                        `;
+                        form.replaceWith(newTask);
+                    }
+                    else{
+                        alert("Error: " + data.error);
+                        form.replaceWith(task);
+                    }
+                })
+                .catch(error => console.error("Error", error));
+            }
+            else{
+                form.replaceWith(task);
+            }
+        })
+        cancelButton.addEventListener('click', () => {
+            form.replaceWith(task);
+        })
+
+    }
     function complete_task(task_id){
         checkbox = document.getElementById("taskCheckbox" + task_id);
         fetch('/complete_task',{
@@ -14,7 +101,7 @@ window.onload = function(){
         .then(data => {
             if (data.success){
                 if (checkbox.checked){
-                    task = document.getElementById("task" + task_id);
+                    task = document.getElementById("task" + task_id).parentElement;
                     taskList = document.getElementById("task-list" + data.folder_id);
                     taskList.removeChild(task);
                     
@@ -26,7 +113,7 @@ window.onload = function(){
                     document.getElementById("task-completed-list" + data.folder_id).appendChild(task);  
                 }
                 else{
-                    task = document.getElementById("task" + task_id);
+                    task = document.getElementById("task" + task_id).parentElement;
                     taskList = document.getElementById("task-completed-list" + data.folder_id);
                     taskList.removeChild(task);
                     document.getElementById("task-list" + data.folder_id).appendChild(task);  
@@ -85,13 +172,27 @@ window.onload = function(){
             .then(response => response.json())
             .then(data => {
                 if (data.success){
-                    let taskItem = document.createElement('li');
+                    let taskItem = document.createElement('div');
+                    task_id = data.task_id;
+                    taskItem.style = "display: flex; align-items: center; justify-content: space-between;";
                     taskItem.className = "task-item";
-                    taskItem.innerHTML = `<input type="checkbox">` + taskName;
+                    //taskItem.innerHTML = `<input type="checkbox" id="taskCheckbox` + data.task_id + `">` + taskName;
+                    taskItem.innerHTML = `
+                    <li id="task` + task_id + `"><input type="checkbox" id="taskCheckbox` + task_id +`"> ` + taskName + ` </li>
+                    <button type="button" style="border: none;background: transparent;" data-bs-toggle="dropdown" aria-expanded="false"> : </button>
+                    <ul class="dropdown-menu">
+                        <li><button class="dropdown-item task-delete" id="taskDelete` + task_id + `">Удалить</button></li>
+                        <li><button class="dropdown-item task-edit" id="taskEdit` + task_id + `">Редактировать</button></li>
+                    </ul>
+                    `;
+                    checkbox = taskItem.querySelector("input");
+                    checkbox.addEventListener('change', () => {
+                        complete_task(data.task_id);
+                    });
                     document.getElementById("task-list" + folder_id).appendChild(taskItem);
-
                     newTask.remove();
                     button.style.pointerEvents = "auto";
+
                 }
                 else{
                     alert("Error: " + data.error);
@@ -315,4 +416,17 @@ window.onload = function(){
             complete_task(taskId);
         });
     });
-};
+    document.querySelectorAll('.task-edit').forEach(button => 
+        button.addEventListener('click', () => {
+            let taskId = button.id.replace("taskEdit", "");
+            edit_task(taskId);
+        })
+    )
+    document.querySelectorAll(".task-delete").forEach(button =>
+        button.addEventListener('click', () => {
+            let taskId = button.id.replace("taskDelete", "");
+            delete_task(taskId);
+        })
+    )
+    
+}

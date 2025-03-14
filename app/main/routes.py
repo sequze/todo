@@ -1,4 +1,5 @@
 from flask import render_template, request, make_response, jsonify
+from flask_login import current_user
 from app.main import main
 from app.models import Task, Folder
 from app import db
@@ -33,7 +34,7 @@ def add_task():
     t = Task(name=task_name, user_id=user_id, folder_id=folder_id)
     db.session.add(t)
     db.session.commit()
-    res = make_response(jsonify({"success": True}), 200)
+    res = make_response(jsonify({"success": True, "task_id": t.id}), 200)
     return res
 
 @main.route("/add_folder", methods=["POST"])
@@ -102,3 +103,37 @@ def complete_task():
     task.is_completed = not task.is_completed
     db.session.commit()
     return make_response(jsonify(success=True, folder_id=folder_id))
+
+@main.route("/login", methods=["GET"])
+def login():
+    return render_template("login.html")
+
+@main.route("/edit_task", methods=["POST"])
+def edit_task():
+    data = request.get_json()
+    task_id = data.get("task_id")
+    if not task_id: 
+        return make_response(jsonify(success=False, error="Please enter task_id!"))
+    name = data.get("name")
+    if not name: 
+        return make_response(jsonify(success=False, error="Please enter name!"))
+    task = db.session.scalar(sa.select(Task).where(Task.id == task_id))
+    if not task:
+        return make_response(jsonify(success=False, error="Task not found!"))
+    task.name = name
+    db.session.commit()
+    return make_response(jsonify(success=True))
+
+@main.route("/delete_task", methods=["POST"])
+def delete_task():
+    data = request.get_json()
+    task_id = data.get("task_id")
+    if not task_id:
+        return make_response(jsonify(success=False, error="Please enter task_id"))
+    task = db.session.scalar(sa.select(Task).where(Task.id == task_id))
+    if not task:
+        return make_response(jsonify(success=False, error="Task not found!"))
+    db.session.delete(task)
+    db.session.commit()
+    return make_response(jsonify(success=True))
+
