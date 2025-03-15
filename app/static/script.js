@@ -65,9 +65,9 @@ window.onload = function(){
                 .then(data => {
                     if (data.success){
                         newTask = document.createElement("li");
+                        newTask.id = "task" + task_id;
                         newTask.innerHTML = `
-                        <li id="task` + task_id + `"><input type="checkbox" id="taskCheckbox` + task_id + `"> ` + newName + ` </li>
-                        `;
+                        <input type="checkbox" id="taskCheckbox` + task_id + `"> ` + newName;
                         form.replaceWith(newTask);
                     }
                     else{
@@ -191,6 +191,8 @@ window.onload = function(){
                     });
                     document.getElementById("task-list" + folder_id).appendChild(taskItem);
                     newTask.remove();
+                    taskItem.querySelector(".task-delete").addEventListener('click', () => delete_task(task_id));
+                    taskItem.querySelector(".task-edit").addEventListener('click', () => edit_task(task_id));
                     button.style.pointerEvents = "auto";
 
                 }
