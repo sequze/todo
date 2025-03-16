@@ -332,30 +332,10 @@ window.onload = function(){
         folder = document.getElementById("folder" + folder_id);
         folderName = folder.querySelector("h5");
         folderHead = folder.firstElementChild;
-        const form = document.createElement('form');  
-        form.classList.add('edit-folder-form'); // Добавим класс для стилизации  
-
-        // Создаем кнопки
-        const input = document.createElement('input');  
-        input.type = 'text';
-        input.classList.add("form-control")
-        input.value = folderName.textContent;  
-
-        const saveButton = document.createElement('button');  
-        saveButton.textContent = '✅';  
-        saveButton.className = "btn btn-light btn-sm";
-        saveButton.type = 'submit';  
-
-        const cancelButton = document.createElement('button');  
-        cancelButton.textContent = '❌';  
-        cancelButton.className = "btn btn-light btn-sm";
-        cancelButton.type = 'button'; // Важно, чтобы не отправлял форму  
-
-        form.appendChild(input);  
-        form.appendChild(saveButton);  
-        form.appendChild(cancelButton);
-        form.style = "display: flex; gap: 10px; align-items: center;";
+        const form = createEditForm(folderName.textContent);
         folderHead.replaceWith(form);
+        input = form.querySelector(".form-control");
+        cancelButton = form.querySelector(".cancel-button");
         
         form.addEventListener("submit", async(event) => {
             event.preventDefault();
