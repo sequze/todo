@@ -305,28 +305,27 @@ window.onload = function(){
     
 
     //функции для редактирования и удаления папки
-    function delete_folder(folder_id){
-        fetch("/delete_folder", {
-            method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "folder_id": folder_id
-                })
-        })
-        .then(response => response.json())
-        .then(data => {
+    async function delete_folder(folder_id){
+        try{
+            res = await fetch("/delete_folder", {
+                method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "folder_id": folder_id
+                    })
+            })
+            data = await res.json();
             if (data.success){
                 document.getElementById("folder" + folder_id).closest(".folder-column").remove();
             } else {
                 alert("Error: " + data.error);
             }
-        })
-        .catch(error => {
+        } catch(error) {
             console.error("Error", error);
             alert("An error occurred while deleting the folder.");
-        });
+        }
     }
 
     function edit_folder(folder_id) {
