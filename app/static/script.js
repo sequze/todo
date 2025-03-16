@@ -328,7 +328,7 @@ window.onload = function(){
         }
     }
 
-    function edit_folder(folder_id) {
+    async function edit_folder(folder_id) {
         folder = document.getElementById("folder" + folder_id);
         folderName = folder.querySelector("h5");
         folderHead = folder.firstElementChild;
@@ -361,7 +361,8 @@ window.onload = function(){
             event.preventDefault();
             let newName = input.value;
             if (newName && newName != folderName){
-                fetch("/edit_folder", {
+                try{
+                res = await fetch("/edit_folder", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -371,8 +372,7 @@ window.onload = function(){
                         "name": newName
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
+                data = await res.json();
                     if (data.success){
                         newHead = document.createElement("div");
                         newHead.style = "display: flex; align-items: center; justify-content: space-between;";
@@ -394,8 +394,9 @@ window.onload = function(){
                         alert("Error: " + data.error);
                         form.replaceWith(folderHead);
                     }
-                })
-                .catch(error => console.error("Error", error));
+                } catch(error){
+                     console.error("Error", error);
+                }
             }
             else{
                 form.replaceWith(folderHead);
