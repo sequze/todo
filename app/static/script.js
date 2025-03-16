@@ -45,7 +45,7 @@ window.onload = function(){
         form.style = "display: flex; gap: 10px; align-items: center;";
         return form;
     }
-    function edit_task(task_id){
+    async function edit_task(task_id){
         task = document.getElementById("task" + task_id);
         taskName = task.textContent.trim();
         form = createEditForm(taskName);
@@ -56,31 +56,35 @@ window.onload = function(){
             event.preventDefault();
             let newName = input.value.trim();
             if (newName && newName != taskName){
-                fetch("/edit_task", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        "task_id": task_id,
-                        "name": newName
+                try{
+                    const res = await fetch("/edit_task", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            "task_id": task_id,
+                            "name": newName
+                        })
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
+                    const data = await res.json();
                     if (data.success){
                         newTask = document.createElement("li");
                         newTask.id = "task" + task_id;
                         newTask.innerHTML = `
                         <input type="checkbox" id="taskCheckbox` + task_id + `"> ` + newName.trim();
+                        newTask.querySelector("input").addEventListener('change', () => {
+                            complete_task(task_id);
+                        });
                         form.replaceWith(newTask);
                     }
                     else{
                         alert("Error: " + data.error);
                         form.replaceWith(task);
                     }
-                })
-                .catch(error => console.error("Error", error));
+                } catch(error){
+                    console.error("Error", error);
+                }
             }
             else{
                 form.replaceWith(task);
