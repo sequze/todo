@@ -1,3 +1,25 @@
+
+function buildTaskElement(taskId, taskName){
+    let taskItem = document.createElement('div');
+    taskItem.style = "display: flex; align-items: center; justify-content: space-between;";
+    taskItem.className = "task-item";
+    taskItem.innerHTML = `
+    <li id="task` + taskId + `"><input type="checkbox" id="taskCheckbox` + taskId +`"> ` + taskName + ` </li>                    <button type="button" style="border: none;background: transparent;" data-bs-toggle="dropdown" aria-expanded="false"> : </button>
+    <ul class="dropdown-menu">
+        <li><button class="dropdown-item task-delete" id="taskDelete` + taskId + `">Удалить</button></li>
+        <li><button class="dropdown-item task-edit" id="taskEdit` + taskId + `">Редактировать</button></li>
+    </ul>
+    `;
+    checkbox = taskItem.querySelector("input");
+    checkbox.addEventListener('change', () => {
+        complete_task(task_id);
+    });
+    taskItem.querySelector(".task-delete").addEventListener('click', () => delete_task(taskId));
+    taskItem.querySelector(".task-edit").addEventListener('click', () => edit_task(taskId));
+    return taskItem;
+}
+
+
 window.onload = function(){
     async function delete_task(task_id){
         try {
@@ -171,7 +193,6 @@ window.onload = function(){
         document.getElementById("task-list" + folder_id).appendChild(newTask);
         let form = newTask.querySelector(".task-form");
         form.addEventListener('submit', async function(event) {
-            console.log('Привет от JavaScript!');
             event.preventDefault();
             let input = document.getElementById("task-name" + folder_id);
             let taskName = input.value.trim();
@@ -192,27 +213,10 @@ window.onload = function(){
                 })
                 data = await res.json();
                 if (data.success){
-                    let taskItem = document.createElement('div');
                     task_id = data.task_id;
-                    taskItem.style = "display: flex; align-items: center; justify-content: space-between;";
-                    taskItem.className = "task-item";
-                    //taskItem.innerHTML = `<input type="checkbox" id="taskCheckbox` + data.task_id + `">` + taskName;
-                    taskItem.innerHTML = `
-                    <li id="task` + task_id + `"><input type="checkbox" id="taskCheckbox` + task_id +`"> ` + taskName + ` </li>
-                    <button type="button" style="border: none;background: transparent;" data-bs-toggle="dropdown" aria-expanded="false"> : </button>
-                    <ul class="dropdown-menu">
-                        <li><button class="dropdown-item task-delete" id="taskDelete` + task_id + `">Удалить</button></li>
-                        <li><button class="dropdown-item task-edit" id="taskEdit` + task_id + `">Редактировать</button></li>
-                    </ul>
-                    `;
-                    checkbox = taskItem.querySelector("input");
-                    checkbox.addEventListener('change', () => {
-                        complete_task(task_id);
-                    });
+                    taskItem = buildTaskElement(task_id, taskName)
                     document.getElementById("task-list" + folder_id).appendChild(taskItem);
                     newTask.remove();
-                    taskItem.querySelector(".task-delete").addEventListener('click', () => delete_task(task_id));
-                    taskItem.querySelector(".task-edit").addEventListener('click', () => edit_task(task_id));
                     button.style.pointerEvents = "auto";
 
                 }
