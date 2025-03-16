@@ -95,19 +95,19 @@ window.onload = function(){
         })
 
     }
-    function complete_task(task_id){
+    async function complete_task(task_id){
         checkbox = document.getElementById("taskCheckbox" + task_id);
-        fetch('/complete_task',{
-            method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "task_id": task_id
-                })
-        })
-        .then(response => response.json())
-        .then(data => {
+        try{
+            res = await fetch('/complete_task',{
+                method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "task_id": task_id
+                    })
+            })
+            data = await res.json();
             if (data.success){
                 if (checkbox.checked){
                     folder_id = data.folder_id;
@@ -147,16 +147,13 @@ window.onload = function(){
                 alert("Error" + data.error);
                 checkbox.checked = false;
             }
-        })
-        .catch(error => {
+        } catch(error){
             console.error("Error" + error);
             checkbox.checked = false;
         }
-        );
     }
 
-
-    function add_btn(folder_id) {
+    async function add_btn(folder_id) {
         let button = document.getElementById("button" + folder_id);
         button.style.pointerEvents = "none";
         let newTask = document.createElement("li");
@@ -173,7 +170,7 @@ window.onload = function(){
 
         document.getElementById("task-list" + folder_id).appendChild(newTask);
         let form = newTask.querySelector(".task-form");
-        form.addEventListener('submit', function(event) {
+        form.addEventListener('submit', async function(event) {
             console.log('Привет от JavaScript!');
             event.preventDefault();
             let input = document.getElementById("task-name" + folder_id);
@@ -182,19 +179,18 @@ window.onload = function(){
                 alert("Task name cannot be empty!");
                 return;
             }
-            
-            fetch('/add_task', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "taskName": taskName,
-                    "folder_id": folder_id
+            try{
+                res = await fetch('/add_task', {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "taskName": taskName,
+                        "folder_id": folder_id
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
+                data = await res.json();
                 if (data.success){
                     let taskItem = document.createElement('div');
                     task_id = data.task_id;
@@ -211,7 +207,7 @@ window.onload = function(){
                     `;
                     checkbox = taskItem.querySelector("input");
                     checkbox.addEventListener('change', () => {
-                        complete_task(data.task_id);
+                        complete_task(task_id);
                     });
                     document.getElementById("task-list" + folder_id).appendChild(taskItem);
                     newTask.remove();
@@ -223,9 +219,10 @@ window.onload = function(){
                 else{
                     alert("Error: " + data.error);
                 }
-            })
-            .catch(error => console.error("Error", error));
-        });
+            } catch(error){
+                console.error("Error", error);
+        }
+    })
     }
     function add_folder() {
         let button = document.getElementById("new-folder-btn");
