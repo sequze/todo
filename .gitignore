@@ -35,3 +35,8 @@ migrations/
 # Лог-файлы
 *.log
 logs/
+
+app/static/folders.js
+app/static/listeners.js
+app/static/formUTils.js
+app/static/tasks.js
