@@ -1,55 +1,60 @@
 window.onload = function(){
-    function delete_task(task_id){
-        task = document.getElementById("task" + task_id).parentElement;
-        fetch("/delete_task", {
-            method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        "task_id": task_id,
-                    })
-        })
-        .then(response => response.json())
-        .then(data => {
+    async function delete_task(task_id){
+        try {
+            task = document.getElementById("task" + task_id).parentElement;
+            const res = await fetch("/delete_task", {
+                method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            "task_id": task_id,
+                        })
+            })
+    
+            const data = await res.json()
+    
             if (data.success){
                 task.remove();
             }
             else{
                 alert("Error: " + data.error);
             }
-        })
-        .catch(error => console.error("Error", error));
+        } catch(error) {
+            console.error("Error", error)
+        }
     }
-    function edit_task(task_id){
-        task = document.getElementById("task" + task_id);
+    function createEditForm(text){
         const form = document.createElement('form');  
-        form.classList.add('edit-folder-form'); // Добавим класс для стилизации  
-        taskName = task.childNodes[1].nodeValue.trim();
-                // Создаем кнопки
+        form.classList.add('edit-folder-form');
         const input = document.createElement('input');  
         input.type = 'text';
         input.classList.add("form-control")
-        input.value = taskName;  
-
+        input.value = text;
         const saveButton = document.createElement('button');  
         saveButton.textContent = '✅';  
         saveButton.className = "btn btn-light btn-sm";
         saveButton.type = 'submit';  
-
         const cancelButton = document.createElement('button');  
         cancelButton.textContent = '❌';  
-        cancelButton.className = "btn btn-light btn-sm";
+        cancelButton.className = "btn btn-light btn-sm cancel-button";
         cancelButton.type = 'button'; // Важно, чтобы не отправлял форму  
-
         form.appendChild(input);  
         form.appendChild(saveButton);  
         form.appendChild(cancelButton);
         form.style = "display: flex; gap: 10px; align-items: center;";
+        return form;
+    }
+    function edit_task(task_id){
+        task = document.getElementById("task" + task_id);
+        taskName = task.textContent.trim();
+        form = createEditForm(taskName);
+        input = form.querySelector(".form-control");
+        cancelButton = form.querySelector(".cancel-button");
         task.replaceWith(form);
         form.addEventListener("submit", async(event) => {
             event.preventDefault();
-            let newName = input.value;
+            let newName = input.value.trim();
             if (newName && newName != taskName){
                 fetch("/edit_task", {
                     method: "POST",
@@ -67,7 +72,7 @@ window.onload = function(){
                         newTask = document.createElement("li");
                         newTask.id = "task" + task_id;
                         newTask.innerHTML = `
-                        <input type="checkbox" id="taskCheckbox` + task_id + `"> ` + newName;
+                        <input type="checkbox" id="taskCheckbox` + task_id + `"> ` + newName.trim();
                         form.replaceWith(newTask);
                     }
                     else{
@@ -101,15 +106,30 @@ window.onload = function(){
         .then(data => {
             if (data.success){
                 if (checkbox.checked){
+                    folder_id = data.folder_id;
                     task = document.getElementById("task" + task_id).parentElement;
-                    taskList = document.getElementById("task-list" + data.folder_id);
+                    taskList = document.getElementById("task-list" + folder_id);
                     taskList.removeChild(task);
-                    
-                    // taskName = task.textContent;
-                    // task.remove();
-                    // finishedTask = document.createElement("li");
-                    // finishedTask.className = "task-item";
-                    // finishedTask.innerHTML = `<input type="checkbox" id="taskCheckbox`+ task_id +`" checked>` + taskName;
+                    if (document.getElementById("task-completed-list" + folder_id) == null){
+                        finished_tasks = document.createElement("div");
+                        finished_tasks.style = "display: flex; align-items: center;";
+                        finished_tasks.class = "finished_tasks";
+                        finished_tasks.innerHTML = `
+                        <span>▸</span>
+                        <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#hiddenFolder` + folder_id + `" aria-expanded="false" aria-controls="hiddenFolder` + folder_id + `">
+                            Выполненные задачи
+                        </button>
+                        `;
+
+                        hidden_tasks = document.createElement("div");
+                        hidden_tasks.className = "collapse";
+                        hidden_tasks.id = "hiddenFolder" + folder_id;
+                        hidden_tasks.innerHTML = `
+                            <div class="card card-body" id="task-completed-list` + folder_id + `"></div>
+                        `;
+                        document.getElementById("folder" + folder_id).appendChild(finished_tasks);
+                        document.getElementById("folder" + folder_id).appendChild(hidden_tasks);
+                    }
                     document.getElementById("task-completed-list" + data.folder_id).appendChild(task);  
                 }
                 else{
