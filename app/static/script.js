@@ -224,7 +224,7 @@ window.onload = function(){
         }
     })
     }
-    function add_folder() {
+    async function add_folder() {
         let button = document.getElementById("new-folder-btn");
         button.style.pointerEvents = "none";
         let folderList = document.getElementById("folder-list");
@@ -242,7 +242,7 @@ window.onload = function(){
         `;
         folderList.appendChild(createFolderInterface);
         let form = createFolderInterface.querySelector(".folder-form");
-        form.addEventListener('submit', function(event){
+        form.addEventListener('submit', async function(event){
             console.log("adding new folder...");
             event.preventDefault();
             input = document.getElementById("add-folder");
@@ -251,17 +251,18 @@ window.onload = function(){
                 alert("Folder name can`t be empty!");
                 return;
             }
-            fetch("/add_folder", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "folderName": folderName
+            try {
+                res = await fetch("/add_folder", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "folderName": folderName
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
+
+                data = await res.json();
                 if (data.success){
                     let folderItem = document.createElement('div');
                     folderItem.className = "folder-column";
@@ -296,8 +297,9 @@ window.onload = function(){
                 else{
                     alert("Error: " + data.error);
                 }
-            })
-            .catch(error => console.error("Error", error));
+            } catch(error) {
+                console.error("Error", error);
+            }
             });
     }
     
