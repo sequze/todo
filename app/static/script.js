@@ -10,7 +10,7 @@ function buildTaskElement(taskId, taskName){
         <li><button class="dropdown-item task-edit" id="taskEdit` + taskId + `">Редактировать</button></li>
     </ul>
     `;
-    checkbox = taskItem.querySelector("input");
+    let checkbox = taskItem.querySelector("input");
     checkbox.addEventListener('change', () => {
         complete_task(task_id);
     });
@@ -21,16 +21,16 @@ function buildTaskElement(taskId, taskName){
 function initListeners() {
     document.querySelector(".new-folder-btn").addEventListener('click', add_folder);
     document.querySelectorAll(".add-task").forEach(button => {
-        folder_id = button.id.replace("button", "");
+        let folder_id = button.id.replace("button", "");
         button.addEventListener('click', () => add_btn(folder_id));
         
     })
     document.querySelectorAll(".folder-delete-btn").forEach(button => {
-        folder = button.id.replace("folderDelete", "");
+        let folder = button.id.replace("folderDelete", "");
         button.addEventListener('click', () => delete_folder(folder));
     })
     document.querySelectorAll(".folder-edit-btn").forEach(button  => {
-        folder = button.id.replace("folderEdit", "");
+        let folder = button.id.replace("folderEdit", "");
         button.addEventListener('click', () => edit_folder(folder))
     })
     document.querySelectorAll('.task-item input[type="checkbox"]').forEach(checkbox => {
@@ -55,7 +55,7 @@ function initListeners() {
 }
 async function delete_task(task_id){
     try {
-        task = document.getElementById("task" + task_id).parentElement;
+        let task = document.getElementById("task" + task_id).parentElement;
         const res = await fetch("/delete_task", {
             method: "POST",
                     headers: {
@@ -221,7 +221,6 @@ async function add_btn(folder_id) {
         </div>
     </form>
     `;
-
     document.getElementById("task-list" + folder_id).appendChild(newTask);
     let form = newTask.querySelector(".task-form");
     form.addEventListener('submit', async function(event) {
@@ -310,8 +309,8 @@ async function add_folder() {
                         <div class="dropdown">
                             <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
                             <ul class="dropdown-menu">
-                              <li><button class="dropdown-item" id="folderDelete`+ folder_id + `">Удалить</button></li>
-                              <li><button class="dropdown-item" id="folderEdit` + folder_id + `">Редактировать</button></li>
+                              <li><button class="dropdown-item folder-delete-btn" id="folderDelete`+ folder_id + `">Удалить</button></li>
+                              <li><button class="dropdown-item folder-edit-btn" id="folderEdit` + folder_id + `">Редактировать</button></li>
                             </ul>
                         </div>
                     </div>

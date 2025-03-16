@@ -83,9 +83,9 @@ def edit_folder():
         return make_response(jsonify(sucess=False, error="Please enter new folder name"))
     folder = db.session.scalar(sa.select(Folder).where(Folder.id==folder_id))
     if not folder:
-        return make_response(success=False, error="folder not found!")
+        return make_response(jsonify(success=False, error="folder not found!"))
     if folder.user_id != current_user.id:
-        return make_response(success=False, error="Not Allowed")
+        return make_response(jsonify(success=False, error="Not Allowed"))
     folder.name = new_name
     db.session.commit()
     return make_response(jsonify(success=True))
@@ -100,9 +100,9 @@ def delete_folder():
         return make_response(jsonify(sucess=False, error="Please enter folder id"))
     folder = db.session.scalar(sa.select(Folder).where(Folder.id == folder_id))
     if not folder:
-        return make_response(success=False, error="folder not found!")
+        return make_response(jsonify(success=False, error="folder not found!"))
     if folder.user_id != current_user.id:
-        return make_response(success=False, error="Not Allowed")
+        return make_response(jsonify(success=False, error="Not Allowed"))
     db.session.delete(folder)
     db.session.commit()
     return make_response(jsonify(success=True))
@@ -119,9 +119,9 @@ def complete_task():
     if not folder_id: 
         return make_response(jsonify(success=False, error="folder not found!"))
     if not task:
-        return make_response(success=False, error="Task not found!")
+        return make_response(jsonify(success=False, error="Task not found!"))
     if task.user_id != current_user.id:
-        return make_response(success=False, error="Not Allowed")
+        return make_response(jsonify(success=False, error="Not Allowed"))
     task.is_completed = not task.is_completed
     db.session.commit()
     return make_response(jsonify(success=True, folder_id=folder_id))
@@ -138,9 +138,9 @@ def edit_task():
         return make_response(jsonify(success=False, error="Please enter name!"))
     task = db.session.scalar(sa.select(Task).where(Task.id == task_id))
     if not task:
-        return make_response(success=False, error="Task not found!")
+        return make_response(jsonify(success=False, error="Task not found!"))
     if task.user_id != current_user.id:
-        return make_response(success=False, error="Not Allowed")
+        return make_response(jsonify(success=False, error="Not Allowed"))
     task.name = name
     db.session.commit()
     return make_response(jsonify(success=True))
@@ -154,9 +154,9 @@ def delete_task():
         return make_response(jsonify(success=False, error="Please enter task_id"))
     task = db.session.scalar(sa.select(Task).where(Task.id == task_id))
     if not task:
-        return make_response(success=False, error="Task not found!")
+        return make_response(jsonify(success=False, error="Task not found!"))
     if task.user_id != current_user.id:
-        return make_response(success=False, error="Not Allowed")
+        return make_response(jsonify(success=False, error="Not Allowed"))
     db.session.delete(task)
     db.session.commit()
     return make_response(jsonify(success=True))

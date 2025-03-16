@@ -5,7 +5,7 @@
     <div class="container">
         <h2 class="text-center mb-4">📌 Мои задачи</h2>
         <button class="btn btn-outline-primary new-folder-btn" id="new-folder-btn">➕ Добавить новую папку</button>
-        <div class="d-flex gap-3 flex-wrap" id="folder-list">
+        <div class="d-flex flex-row gap-3 flex-nowrap" id="folder-list">
             {% for folder in folders %}
             <div class="folder-column">
                 <div class="folder" id="folder{{folder.id}}">
