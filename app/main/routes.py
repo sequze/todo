@@ -1,17 +1,21 @@
 from flask import render_template, request, make_response, jsonify
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.main import main
 from app.models import Task, Folder
 from app import db
 import sqlalchemy as sa
 import sqlalchemy.orm as so
+
+
+
 @main.route("/")
 @main.route("/index")
+@login_required
 def index():
     folders = (
         db.session.query(Folder)
         .options(so.joinedload(Folder.tasks))
-        .filter(Folder.user_id == 1)
+        .filter(Folder.user_id == current_user.id)
         .all()
     )
     folders_indexes = [i.id for i in folders]
@@ -19,17 +23,22 @@ def index():
 
 
 @main.route("/add_task", methods=["POST"])
+@login_required
 def add_task():
     # TODO: сделать проверку айди папки
     data = request.get_json()
     task_name = data.get("taskName")
     folder_id = data.get("folder_id")
-
+    
     if not folder_id:
         return make_response(jsonify(success=False, error="Please Enter folder id!"))
     if not task_name:
         return make_response(jsonify(success=False, error="Please Enter task name!"))
-
+    folder = db.session.scalar(sa.select(Folder).where(Folder.id==folder_id))
+    if not folder:
+        return make_response(jsonify(success=False, error="folder is not found!"))
+    if folder.user_id != current_user.id:
+        return make_response(jsonify(success=False, error="folder not allowed!"))
     user_id = db.session.scalar(sa.select(Folder).where(Folder.id == folder_id)).user_id
     t = Task(name=task_name, user_id=user_id, folder_id=folder_id)
     db.session.add(t)
@@ -38,6 +47,7 @@ def add_task():
     return res
 
 @main.route("/add_folder", methods=["POST"])
+@login_required
 def add_folder():
     #TODO: сделать для юзера
     #TODO: добавить возможность описания папки
@@ -46,26 +56,23 @@ def add_folder():
     folder_name = data.get("folderName")
     if not folder_name:
         return make_response(jsonify(sucess=False, error="Please enter folder name!"))
-    f = Folder(name=folder_name, user_id=1)
+    
+    f = Folder(name=folder_name, user_id=current_user.id)
     db.session.add(f)
     db.session.commit()
-    folder_id = db.session.scalar(sa.select(Folder).where(Folder.name==folder_name)).id
-    print(folder_id)
-    if not folder_id:
-        return make_response(jsonify(sucess=False, error="Database Error"))
-    return make_response(jsonify(success=True, folder_id=folder_id), 200)
+    return make_response(jsonify(success=True, folder_id=f.id), 200)
 
 
 @main.route("/get_folders", methods=["POST"])
+@login_required
 def get_folders():
     #TODO получать айди пользователя и фильтровать по нему
-    data = request.get_json()
-    user_id = data.get("user_id", 1)
-    indexes = [f.id for f in db.session.query(Folder).filter(Folder.user_id == user_id).all()]
+    indexes = [f.id for f in db.session.query(Folder).filter(Folder.user_id == current_user.id).all()]
     return make_response(jsonify(success=True, folders=indexes))
 
 
 @main.route("/edit_folder", methods=["POST"])
+@login_required
 def edit_folder():
     data = request.get_json()
     folder_id = data.get("folder_id")
@@ -75,22 +82,33 @@ def edit_folder():
     if not new_name:
         return make_response(jsonify(sucess=False, error="Please enter new folder name"))
     folder = db.session.scalar(sa.select(Folder).where(Folder.id==folder_id))
+    if not folder:
+        return make_response(success=False, error="folder not found!")
+    if folder.user_id != current_user.id:
+        return make_response(success=False, error="Not Allowed")
     folder.name = new_name
     db.session.commit()
     return make_response(jsonify(success=True))
 
 
 @main.route("/delete_folder", methods=["POST"])
+@login_required
 def delete_folder():
     data = request.get_json()
     folder_id = data.get("folder_id")
     if not folder_id:
         return make_response(jsonify(sucess=False, error="Please enter folder id"))
-    db.session.delete(db.session.scalar(sa.select(Folder).where(Folder.id == folder_id)))
+    folder = db.session.scalar(sa.select(Folder).where(Folder.id == folder_id))
+    if not folder:
+        return make_response(success=False, error="folder not found!")
+    if folder.user_id != current_user.id:
+        return make_response(success=False, error="Not Allowed")
+    db.session.delete(folder)
     db.session.commit()
     return make_response(jsonify(success=True))
 
 @main.route("/complete_task", methods=["POST"])
+@login_required
 def complete_task():
     data = request.get_json()
     task_id = data.get("task_id")
@@ -100,15 +118,16 @@ def complete_task():
     folder_id = task.folder_id
     if not folder_id: 
         return make_response(jsonify(success=False, error="folder not found!"))
+    if not task:
+        return make_response(success=False, error="Task not found!")
+    if task.user_id != current_user.id:
+        return make_response(success=False, error="Not Allowed")
     task.is_completed = not task.is_completed
     db.session.commit()
     return make_response(jsonify(success=True, folder_id=folder_id))
 
-@main.route("/login", methods=["GET"])
-def login():
-    return render_template("login.html")
-
 @main.route("/edit_task", methods=["POST"])
+@login_required
 def edit_task():
     data = request.get_json()
     task_id = data.get("task_id")
@@ -119,12 +138,15 @@ def edit_task():
         return make_response(jsonify(success=False, error="Please enter name!"))
     task = db.session.scalar(sa.select(Task).where(Task.id == task_id))
     if not task:
-        return make_response(jsonify(success=False, error="Task not found!"))
+        return make_response(success=False, error="Task not found!")
+    if task.user_id != current_user.id:
+        return make_response(success=False, error="Not Allowed")
     task.name = name
     db.session.commit()
     return make_response(jsonify(success=True))
 
 @main.route("/delete_task", methods=["POST"])
+@login_required
 def delete_task():
     data = request.get_json()
     task_id = data.get("task_id")
@@ -132,7 +154,9 @@ def delete_task():
         return make_response(jsonify(success=False, error="Please enter task_id"))
     task = db.session.scalar(sa.select(Task).where(Task.id == task_id))
     if not task:
-        return make_response(jsonify(success=False, error="Task not found!"))
+        return make_response(success=False, error="Task not found!")
+    if task.user_id != current_user.id:
+        return make_response(success=False, error="Not Allowed")
     db.session.delete(task)
     db.session.commit()
     return make_response(jsonify(success=True))
